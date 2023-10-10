@@ -1,10 +1,3 @@
-//Using as reference and making variations of my own
-
-
-
-
-
-
 //var myGamePiece;
 //var myObstacles = [];
 //var myScore;

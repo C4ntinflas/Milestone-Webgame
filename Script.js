@@ -4,6 +4,7 @@ var character = document.getElementById("character");
 var jumping = 0;
 var counter = 0;
 var gameStarted = false;
+var runningUpdate = false;
 
 hole.addEventListener("animationiteration", () => {
     if (gameStarted) {
@@ -19,13 +20,19 @@ document.addEventListener('keydown', (event) => {
 
 function startGame() {
     gameStarted = true;
+    gameLoop(); // Start the game loop when the game starts
+}
+
+function gameLoop() {
+    if (!gameStarted) {
+        return;
+    }
+
+    updateGame();
+    requestAnimationFrame(gameLoop);
 }
 
 function updateGame() {
-    if (!gameStarted) {
-        return;  // Don't update the game if it hasn't started
-    }
-
     var characterTop = parseInt(window.getComputedStyle(character).getPropertyValue("top"));
 
     if (jumping == 0) {
@@ -47,18 +54,32 @@ function jump() {
     if (jumping == 0) {
         jumping = 1;
         let jumpCount = 0;
-        var jumpInterval = setInterval(function () {
+        var startTime = performance.now(); 
+
+        function updateJump() {
+            if (!runningUpdate) {
+                return; // Stop the update if the flag is false
+            }
+
+            var currentTime = performance.now();
+            var deltaTime = currentTime - startTime;
+
             var characterTop = parseInt(window.getComputedStyle(character).getPropertyValue("top"));
             if ((characterTop > 6) && (counter < 15)) {
-                character.style.top = (characterTop - 5) + "px";
+                character.style.top = (characterTop - 3) + "px"; // Use a fixed gravity value
             }
+
             if (jumpCount > 20) {
-                clearInterval(jumpInterval);
                 jumping = 0;
-                jumpCount = 0;
+                return;
             }
+
             jumpCount++;
-        }, 10);
+            requestAnimationFrame(updateJump);
+        }
+
+        runningUpdate = true; // Set the flag to true before starting the jump
+        requestAnimationFrame(updateJump);
     }
 }
 
@@ -69,7 +90,7 @@ function resetHolePosition() {
 
 function handleSpaceInteract() {
     if (!gameStarted) {
-        startGame();
+        startGame();   
     } else {
         jump();
     }
@@ -85,13 +106,14 @@ function handleScoreIncrease() {
     updateScore(counter);
 }
 
+function updateScore(value) {
+    document.getElementById("score").textContent = "Score: " + value;
+}
+
 function resetGame() {
     character.style.top = "100px";
     counter = 0;
     updateScore(0);
     gameStarted = false;
-    clearInterval(gameInterval);
+    runningUpdate = false; // Set the flag to false to stop the update
 }
-
-setInterval(updateGame, 10);
-
