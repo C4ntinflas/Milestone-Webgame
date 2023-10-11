@@ -20,6 +20,7 @@ document.addEventListener('keydown', (event) => {
 
 function startGame() {
     gameStarted = true;
+     startPopup.style.display = 'none'; 
     gameLoop(); // Start the game loop when the game starts
 }
 
